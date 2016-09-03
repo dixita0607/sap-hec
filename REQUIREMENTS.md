@@ -15,9 +15,9 @@
   - [ ] Description
   - [ ] Language
   
-- [ ] Add slider for star
+- [x] Add slider for star
 
-  - [ ] Default 500 
+  - [x] Default 500 
 
 - [ ] Add rate limit
 

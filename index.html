@@ -36,7 +36,7 @@
         margin-left: 24px;
       }
 
-      .search {
+      #searchByLanguage {
         --paper-input-container-color: white;
         --paper-input-container-focus-color: white;
         --paper-input-container-input: {
@@ -44,9 +44,28 @@
         };
         --paper-input-prefix: {
           margin: 0 5px;
-        }
+        };
+        margin-bottom: 15px;
       }
 
+      #starSliderContainer {
+        width: 200px;
+      }
+
+      #starSliderContainer > div div {
+        width: 5ch;
+        text-align: center;
+      }
+
+      #starSlider {
+        --paper-slider-container-color: white;
+        --paper-slider-active-color: white;
+        --paper-slider-knob-start-border-color: white;
+        --paper-slider-knob-color: white;
+        --paper-slider-container: {
+          padding-bottom: 0;
+        };
+      }
 
     </style>
 
@@ -70,15 +89,24 @@
 
         <div class="title">Top Git</div>
 
-        <!-- Search bar -->
+        <div class="layout horizontal around-justified center bottom fit">
 
-        <div class="layout horizontal center-justified bottom fit">
+          <!-- Search bar Todo: Create a custom input element supporting auto-input. -->
 
-          <!-- Todo: Create a custom input element supporting auto-input. -->
-
-          <paper-input label="Language" list="languages" class="search">
+          <paper-input label="Language" list="languages" id="searchByLanguage">
             <iron-icon icon="search" prefix></iron-icon>
           </paper-input>
+
+          <!-- Star slider -->
+
+          <div id="starSliderContainer">
+            <div class="layout horizontal justified">
+              <div>0</div>
+              <div><iron-icon icon="star"></iron-icon></div>
+              <div>1000</div>
+            </div>
+            <paper-slider id="starSlider" min="0" max="1000" value="500"></paper-slider>
+          </div>
 
         </div>
 
