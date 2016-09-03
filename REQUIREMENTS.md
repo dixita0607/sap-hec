@@ -1,26 +1,12 @@
 # Requirements
 
-- [x] Add following components.
-
-  - [x] paper-header-panel
-  - [x] paper-toolbar
-  - [x] paper-input
-  - [x] paper-icon-button
-  - [x] iron-icons
-  - [x] paper-button
-  - [x] paper-slider
-  - [x] paper-styles
-
 - [ ] Add header
 
-  - [ ] Logo
-  - [ ] Title
+  - [x] Logo
+  - [x] Title
   - [ ] Repository search count
-   
-- [ ] Add search by language box
-
-   - [ ] icons
-   - [ ] auto input
+  - [x] Search by language box
+  - [x] Auto input
    
 - [ ] Add list of repositories (search results)
  
