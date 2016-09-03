@@ -12,12 +12,18 @@
   <link rel="import" href="paper-toolbar/paper-toolbar.html">
   <link rel="import" href="paper-input/paper-input.html">
   <link rel="import" href="paper-button/paper-button.html">
-  <link rel="import" href="paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="paper-progress/paper-progress.html">
   <link rel="import" href="iron-icons/iron-icons.html">
   <link rel="import" href="paper-slider/paper-slider.html">
   <link rel="import" href="paper-styles/paper-styles.html">
   <link rel="import" href="iron-flex-layout/iron-flex-layout-classes.html">
   <link rel="import" href="iron-ajax/iron-ajax.html">
+  <link rel="import" href="paper-material/paper-material.html">
+  <style>
+    body {
+      background-image: url('http://subtlepatterns2015.subtlepatterns.netdna-cdn.com/patterns/school.png');
+    }
+  </style>
 </head>
 
 <body class="layout vertical fullbleed" unresolved>
@@ -25,22 +31,26 @@
 <dom-module id="top-git">
   <template>
     <style>
+
       :host {
         display: block;
         --primary-color: #9CDAF0;
         --primary-dark-color: #7CBAE6;
       }
 
+      /* Header */
+
       paper-toolbar {
-        background-color: white;
+        background-color: rgba(255, 255, 255, 0.7);
         color: var(--primary-dark-color);
       }
 
       .logo {
-        margin-left: 20px;
         --iron-icon-height: 50px;
         --iron-icon-width: 60px;
       }
+
+      /* Search bar */
 
       #searchByLanguage {
         --paper-input-container-color: var(--primary-dark-color);
@@ -53,23 +63,71 @@
           color: var(--primary-dark-color);
         };
         margin-bottom: 15px;
+        width: 225px;
       }
 
-      #starSliderContainer {
-        width: 200px;
-      }
-
-      #starSliderContainer > div div {
-        width: 5ch;
-        text-align: center;
-        color: var(--primary-dark-color);
-      }
+      /* Star slider */
 
       #starSlider {
         --paper-slider-container-color: var(--primary-dark-color);
         --paper-slider-active-color: var(--primary-dark-color);
         --paper-slider-knob-start-border-color: var(--primary-dark-color);
         --paper-slider-knob-color: var(--primary-dark-color);
+        margin-bottom: 4px;
+        width: 258px;
+      }
+
+      #starSliderContainer > div div {
+        color: var(--primary-dark-color);
+      }
+
+      /* Rate limit */
+
+      #progressContainer > paper-progress {
+        --paper-progress-active-color: var(--primary-dark-color);
+        margin: 14px 0 16px 0;
+        width: 225px;
+      }
+
+      /* Body */
+
+      /* Repo list */
+
+      paper-material {
+        color: var(--primary-dark-color);
+        background-color: white;
+        padding: 10px;
+        margin: 10px;
+        width: 70%;
+        border-radius: 10px;
+        font-family: Roboto, sans-serif;
+      }
+
+      paper-material a {
+        text-decoration: none;
+        color: var(--primary-dark-color);
+      }
+
+      .repo-img {
+        border-right: 1px solid var(--primary-dark-color);
+        padding: 0 20px 0 10px;
+        margin-right: 10px;
+      }
+
+      .repo-img > iron-icon {
+        --iron-icon-height: 32px;
+        --iron-icon-width: 32px;
+      }
+
+      .repo-heading {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .repo-meta {
+        border-left: 1px solid var(--primary-dark-color);
+        padding-left: 10px;
+        margin-left: 10px;
       }
 
     </style>
@@ -79,8 +137,7 @@
     <iron-ajax
         auto
         id="ajax"
-        url="//api.github.com/search/repositories"
-        params="{{params}}"
+        url="{{url}}"
         handle-as="json"
         on-response="handleResponse"
         debounce-duration="300"
@@ -91,7 +148,7 @@
 
     <paper-header-panel>
 
-      <paper-toolbar class="medium-tall">
+      <paper-toolbar class="medium-tall layout vertical center">
 
         <!-- Logo -->
 
@@ -99,29 +156,41 @@
           <iron-icon src="//assets-cdn.github.com/images/modules/logos_page/Octocat.png" class="logo"></iron-icon>
         </a>
 
-        <!-- Title -->
-
-        <div class="title">Top Git</div>
-
         <div class="layout horizontal around-justified center bottom fit">
 
           <!-- Search bar Todo: Create a custom input element supporting auto-input. -->
 
           <paper-input label="Language" list="languages" id="searchByLanguage" value="{{language}}">
             <iron-icon icon="search" prefix></iron-icon>
+            <div suffix>{{response.total_count}}</div>
           </paper-input>
 
           <!-- Star slider -->
 
           <div id="starSliderContainer">
-            <div class="layout horizontal justified">
-              <div>0</div>
+            <div class="layout horizontal justified center">
+              <div class="flex" style="padding-left: 16px;text-align: left">0</div>
               <div>
                 <iron-icon icon="star"></iron-icon>
               </div>
-              <div>1000</div>
+              <div class="flex" style="padding-right: 16px;text-align: right;">1000</div>
             </div>
             <paper-slider id="starSlider" min="0" max="1000" value="{{stars}}"></paper-slider>
+          </div>
+
+          <!-- Rate limit -->
+
+          <div id="progressContainer">
+
+            <div class="layout horizontal center justified">
+              <div>0</div>
+              <div>
+                <iron-icon icon="warning"></iron-icon>
+              </div>
+              <div>{{rateLimit}}</div>
+            </div>
+            <paper-progress min="0" value="{{remaining}}" max="{{rateLimit}}"></paper-progress>
+
           </div>
 
         </div>
@@ -129,6 +198,36 @@
       </paper-toolbar>
 
     </paper-header-panel>
+
+    <!-- Repo list -->
+
+    <div class="layout vertical center" id="container">
+
+      <template is="dom-repeat" items="{{response.items}}" as="repo">
+
+        <paper-material elevation="3">
+          <div class="layout horizontal">
+            <div class="layout vertical center-center repo-img">
+              <iron-icon src="{{repo.owner.avatar_url}}"></iron-icon>
+            </div>
+            <div class="layout vertical flex around-justified">
+              <div class="repo-heading"><a href="{{repo.html_url}}" target="_blank">{{repo.full_name}}</a></div>
+              <div>{{repo.description}}</div>
+            </div>
+            <div class="layout vertical repo-meta around-justified">
+              <div class="layout horizontal center">
+                <iron-icon icon="star"></iron-icon>
+                {{repo.stargazers_count}}
+              </div>
+              <div>{{repo.language}}</div>
+            </div>
+          </div>
+
+        </paper-material>
+
+      </template>
+
+    </div>
 
   </template>
   <script>
@@ -145,18 +244,18 @@
           },
           rateLimit: {
             type: Number,
-            value: 0
+            value: 10
           },
           remaining: {
             type: Number,
             value: 0
           },
-          params: {
-            computed: '_computeParams(language, stars)'
+          url: {
+            computed: '_computeUrl(language, stars)'
           },
           response: {
             value: function () {
-              return {totalCount: 0, items: []}
+              return {total_count: 0, items: []}
             }
           }
         },
@@ -167,10 +266,11 @@
           this.$.ajax.generateRequest();
         },
 
-        _computeParams: function (language, stars) {
-          return {q: 'stars:>=' + stars, language: language}
+        _computeUrl: function (language, stars) {
+          return '//api.github.com/search/repositories?q=stars:>=' + stars + '+language:' + language + '&sort=stars';
         },
 
+        // Todo: Handle when out of request (Rejection).
         handleResponse: function (event, ironRequest) {
 
           // Extract rate limit headers from ironRequest's xhr object.
@@ -182,6 +282,7 @@
     });
   </script>
 </dom-module>
+
 <top-git></top-git>
 
 <!-- Todo: fetch languages using ajax. -->

@@ -1,19 +1,19 @@
 # Requirements
 
-- [ ] Add header
+- [x] Add header
 
   - [x] Logo
   - [x] Title
-  - [ ] Repository search count
+  - [x] Repository search count
   - [x] Search by language box
   - [x] Auto input
    
-- [ ] Add list of repositories (search results)
+- [x] Add list of repositories (search results)
  
-  - [ ] Repository full name
-  - [ ] Link to its URL (in new window)
-  - [ ] Description
-  - [ ] Language
+  - [x] Repository full name
+  - [x] Link to its URL (in new window)
+  - [x] Description
+  - [x] Language
   
 - [x] Add slider for star
 
