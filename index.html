@@ -17,6 +17,7 @@
   <link rel="import" href="paper-slider/paper-slider.html">
   <link rel="import" href="paper-styles/paper-styles.html">
   <link rel="import" href="iron-flex-layout/iron-flex-layout-classes.html">
+  <link rel="import" href="iron-ajax/iron-ajax.html">
 </head>
 
 <body class="layout vertical fullbleed" unresolved>
@@ -26,24 +27,30 @@
     <style>
       :host {
         display: block;
+        --primary-color: #9CDAF0;
+        --primary-dark-color: #7CBAE6;
       }
 
       paper-toolbar {
-        background-color: var(--paper-light-blue-400);
+        background-color: white;
+        color: var(--primary-dark-color);
       }
 
       .logo {
-        margin-left: 24px;
+        margin-left: 20px;
+        --iron-icon-height: 50px;
+        --iron-icon-width: 60px;
       }
 
       #searchByLanguage {
-        --paper-input-container-color: white;
-        --paper-input-container-focus-color: white;
+        --paper-input-container-color: var(--primary-dark-color);
+        --paper-input-container-focus-color: var(--primary-dark-color);
         --paper-input-container-input: {
-          color: white;
+          color: var(--primary-dark-color);
         };
         --paper-input-prefix: {
           margin: 0 5px;
+          color: var(--primary-dark-color);
         };
         margin-bottom: 15px;
       }
@@ -55,19 +62,30 @@
       #starSliderContainer > div div {
         width: 5ch;
         text-align: center;
+        color: var(--primary-dark-color);
       }
 
       #starSlider {
-        --paper-slider-container-color: white;
-        --paper-slider-active-color: white;
-        --paper-slider-knob-start-border-color: white;
-        --paper-slider-knob-color: white;
-        --paper-slider-container: {
-          padding-bottom: 0;
-        };
+        --paper-slider-container-color: var(--primary-dark-color);
+        --paper-slider-active-color: var(--primary-dark-color);
+        --paper-slider-knob-start-border-color: var(--primary-dark-color);
+        --paper-slider-knob-color: var(--primary-dark-color);
       }
 
     </style>
+
+    <!-- Ajax elements -->
+
+    <iron-ajax
+        auto
+        id="ajax"
+        url="//api.github.com/search/repositories"
+        params="{{params}}"
+        handle-as="json"
+        on-response="handleResponse"
+        debounce-duration="300"
+        last-response="{{response}}">
+    </iron-ajax>
 
     <!-- Header -->
 
@@ -78,11 +96,7 @@
         <!-- Logo -->
 
         <a href="https://github.com/" target="_blank">
-          <svg width="28" viewBox="0 0 16 16" class="logo">
-            <path
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-                fill="white"></path>
-          </svg>
+          <iron-icon src="//assets-cdn.github.com/images/modules/logos_page/Octocat.png" class="logo"></iron-icon>
         </a>
 
         <!-- Title -->
@@ -93,7 +107,7 @@
 
           <!-- Search bar Todo: Create a custom input element supporting auto-input. -->
 
-          <paper-input label="Language" list="languages" id="searchByLanguage">
+          <paper-input label="Language" list="languages" id="searchByLanguage" value="{{language}}">
             <iron-icon icon="search" prefix></iron-icon>
           </paper-input>
 
@@ -102,10 +116,12 @@
           <div id="starSliderContainer">
             <div class="layout horizontal justified">
               <div>0</div>
-              <div><iron-icon icon="star"></iron-icon></div>
+              <div>
+                <iron-icon icon="star"></iron-icon>
+              </div>
               <div>1000</div>
             </div>
-            <paper-slider id="starSlider" min="0" max="1000" value="500"></paper-slider>
+            <paper-slider id="starSlider" min="0" max="1000" value="{{stars}}"></paper-slider>
           </div>
 
         </div>
@@ -121,10 +137,47 @@
         is: 'top-git',
 
         properties: {
-          repoCount: {
-            type: Number
+          language: {
+            value: 'PHP'
+          },
+          stars: {
+            value: 500
+          },
+          rateLimit: {
+            type: Number,
+            value: 0
+          },
+          remaining: {
+            type: Number,
+            value: 0
+          },
+          params: {
+            computed: '_computeParams(language, stars)'
+          },
+          response: {
+            value: function () {
+              return {totalCount: 0, items: []}
+            }
           }
+        },
+
+        ready: function () {
+
+          // Send request when component is ready.
+          this.$.ajax.generateRequest();
+        },
+
+        _computeParams: function (language, stars) {
+          return {q: 'stars:>=' + stars, language: language}
+        },
+
+        handleResponse: function (event, ironRequest) {
+
+          // Extract rate limit headers from ironRequest's xhr object.
+          this.rateLimit = ironRequest.xhr.getResponseHeader('X-RateLimit-Limit');
+          this.remaining = ironRequest.xhr.getResponseHeader('X-RateLimit-Remaining');
         }
+
       });
     });
   </script>

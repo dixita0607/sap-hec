@@ -19,7 +19,7 @@
 
   - [x] Default 500 
 
-- [ ] Add rate limit
+- [x] Add rate limit
 
 - [ ] Responsive UI
 
