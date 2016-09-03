@@ -7,9 +7,36 @@
   <title>Top Git</title>
   <base href="https://polygit.org/components/">
   <script src="webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="paper-toolbar/paper-toolbar.html">
+  <link rel="import" href="paper-input/paper-input.html">
   <link rel="import" href="paper-button/paper-button.html">
+  <link rel="import" href="paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="iron-icons/iron-icons.html">
+  <link rel="import" href="paper-slider/paper-slider.html">
+  <link rel="import" href="paper-styles/paper-styles.html">
 </head>
 <body>
-<paper-button>Hello World</paper-button>
+<dom-module id="top-git">
+  <template>
+    <style>
+      :host {
+        display: block;
+        color: var(--paper-green-500);
+      }
+    </style>
+    <p>
+      Top Git
+    </p>
+  </template>
+  <script>
+    HTMLImports.whenReady(function () {
+      Polymer({
+        is: 'top-git'
+      });
+    });
+  </script>
+</dom-module>
+<top-git></top-git>
 </body>
 </html>
