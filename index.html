@@ -19,6 +19,7 @@
   <link rel="import" href="iron-flex-layout/iron-flex-layout-classes.html">
   <link rel="import" href="iron-ajax/iron-ajax.html">
   <link rel="import" href="paper-material/paper-material.html">
+  <link rel="import" href="paper-spinner/paper-spinner-lite.html">
   <style>
     body {
       background-image: url('http://subtlepatterns2015.subtlepatterns.netdna-cdn.com/patterns/school.png');
@@ -64,6 +65,14 @@
         };
         margin-bottom: 15px;
         width: 225px;
+      }
+
+      paper-spinner-lite {
+        width: 18px;
+        height: 18px;
+        margin: 3px 8px;
+        --paper-spinner-color: var(--primary-dark-color);
+        --paper-spinner-stroke-width: 2px;
       }
 
       /* Star slider */
@@ -114,9 +123,11 @@
         margin-right: 10px;
       }
 
-      .repo-img > iron-icon {
-        --iron-icon-height: 32px;
-        --iron-icon-width: 32px;
+      .repo-img > img {
+        height: 32px;
+        width: 32px;
+        border: 2px solid var(--primary-dark-color);
+        border-radius: 50%;
       }
 
       .repo-heading {
@@ -140,8 +151,9 @@
         url="{{url}}"
         handle-as="json"
         on-response="handleResponse"
-        debounce-duration="300"
-        last-response="{{response}}">
+        debounce-duration="1000"
+        last-response="{{response}}"
+        loading="{{loading}}">
     </iron-ajax>
 
     <!-- Header -->
@@ -160,8 +172,17 @@
 
           <!-- Search bar Todo: Create a custom input element supporting auto-input. -->
 
-          <paper-input label="Language" list="languages" id="searchByLanguage" value="{{language}}">
-            <iron-icon icon="search" prefix></iron-icon>
+          <paper-input label="Language" list="languages" id="searchByLanguage" value="{{language}}"
+                       disabled="{{loading}}">
+
+            <!-- Search icon -->
+
+            <iron-icon icon="search" prefix hidden="{{loading}}"></iron-icon>
+
+            <!-- Loading status -->
+
+            <paper-spinner-lite active="{{loading}}" prefix hidden="{{!loading}}"></paper-spinner-lite>
+
             <div suffix>{{response.total_count}}</div>
           </paper-input>
 
@@ -175,7 +196,7 @@
               </div>
               <div class="flex" style="padding-right: 16px;text-align: right;">1000</div>
             </div>
-            <paper-slider id="starSlider" min="0" max="1000" value="{{stars}}"></paper-slider>
+            <paper-slider id="starSlider" min="0" max="1000" value="{{stars}}" disabled="{{loading}}"></paper-slider>
           </div>
 
           <!-- Rate limit -->
@@ -199,6 +220,8 @@
 
     </paper-header-panel>
 
+    <!-- Body -->
+
     <!-- Repo list -->
 
     <div class="layout vertical center" id="container">
@@ -208,7 +231,7 @@
         <paper-material elevation="3">
           <div class="layout horizontal">
             <div class="layout vertical center-center repo-img">
-              <iron-icon src="{{repo.owner.avatar_url}}"></iron-icon>
+              <img src="{{repo.owner.avatar_url}}" alt="avatar"/>
             </div>
             <div class="layout vertical flex around-justified">
               <div class="repo-heading"><a href="{{repo.html_url}}" target="_blank">{{repo.full_name}}</a></div>
@@ -257,6 +280,10 @@
             value: function () {
               return {total_count: 0, items: []}
             }
+          },
+          loading: {
+            type: Boolean,
+            value: false
           }
         },
 

@@ -23,4 +23,6 @@
 
 - [ ] Responsive UI
 
-- [ ] Loading status
+- [x] Loading status
+
+- [ ] Add Pagination (load more feature)
